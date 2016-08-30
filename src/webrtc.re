@@ -149,12 +149,3 @@ let module RTCPeerConnection = {
     method close () :unit => meth_call _innerSelf "close" [||];
   };
 };
-
-/* type t = SendingOffer | OfferSent; */
-/* let module SymmetricConnection = {
-     type t;
-
-     let connect dataChannelName::dataChannelName => {
-       meth_call (variable "window") "doThePeerConnectionThing" [|inject (Js.string dataChannelName)|];
-     };
-   }; */
