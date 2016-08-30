@@ -1,3 +1,8 @@
+/*
+ * vim: set ft=rust:
+ * vim: set ft=reason:
+ */
+
 let log bla =>
   ignore @@ Js.Unsafe.(meth_call (variable "console") "log" [|inject (Js.string bla)|]);
 
