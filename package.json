@@ -1,0 +1,19 @@
+{
+  "name": "rewebrtc",
+  "version": "0.0.1",
+  "description": "webrtc in Reason",
+  "jengaboot": {
+    "ocamlfindDependencies": {
+      "js_of_ocaml": "*"
+    }
+  },
+  "dependencies": {
+    "express": "^4.10.2",
+    "reSocketIO": "git://github.com/bsansouci/ReSocket.io.git",
+    "webrtc-adapter": "^2.0.2"
+  },
+  "devDependencies": {
+    "jengaboot": "git://github.com/bsansouci/jengaboot.git#tmp"
+  },
+  "author": "Benjamin San Souci <benjamin.sansouci@gmail.com>"
+}
