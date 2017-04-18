@@ -2,18 +2,23 @@
   "name": "rewebrtc",
   "version": "0.0.1",
   "description": "webrtc in Reason",
-  "jengaboot": {
-    "ocamlfindDependencies": {
-      "js_of_ocaml": "*"
-    }
+  "scripts": {
+    "build": "bsb",
+    "watch": "bsb -w",
+    "build-deps": "bsb -make-world",
+    "server": "node server.js",
+    "pack": "webpack lib/js/example/example.js --output-filename lib/app.js",
+    "clean": "bsb -clean-world"
   },
   "dependencies": {
-    "express": "^4.10.2",
-    "reSocketIO": "git://github.com/bsansouci/ReSocket.io.git",
     "webrtc-adapter": "^2.0.2"
   },
   "devDependencies": {
-    "jengaboot": "git://github.com/bsansouci/jengaboot.git#tmp"
+    "ReSocketIO": "https://github.com/bsansouci/ReSocket.io",
+    "bs-platform": "https://github.com/bloomberg/bucklescript",
+    "express": "^4.10.2",
+    "reason-js": "https://github.com/BuckleTypes/reason-js#v0.3.0",
+    "webpack": "^2.4.1"
   },
   "author": "Benjamin San Souci <benjamin.sansouci@gmail.com>"
 }
