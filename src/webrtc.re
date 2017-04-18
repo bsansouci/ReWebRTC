@@ -1,151 +1,89 @@
-/*
- * vim: set ft=rust:
- * vim: set ft=reason:
- */
-
-open Js.Unsafe;
-
-let module RTCIceCandidate = {
-  class t innerSelf => {
-    val _innerSelf: any = innerSelf;
-    method raw = _innerSelf;
-  };
+module RTCIceCandidate = {
+  type t;
+  external create : unit => t = "RTCIceCandidate" [@@bs.new];
 };
 
-let module RTCPeerConnectionIceEvent = {
-  class t innerSelf => {
-    val _innerSelf = innerSelf;
-    method candidate: RTCIceCandidate.t = (new RTCIceCandidate.t) (get _innerSelf "candidate");
-  };
+module RTCPeerConnectionIceEvent = {
+  type t;
+  external getCandidate : t => RTCIceCandidate.t = "candidate" [@@bs.get];
 };
 
-let module RTCIceConnectionStateChangeEvent = {
-  class t innerSelf => {
-    val _innerSelf = innerSelf;
-    method iceConnectionState = Js.to_string (get _innerSelf "iceConnectionState");
-  };
+module RTCIceConnectionStateChangeEvent = {
+  type t;
+  external getIceConnectionState : t => string = "iceConnectionState" [@@bs.get];
 };
 
-let module MessageEvent = {
-  class t innerSelf => {
-    val _innerSelf: any = innerSelf;
-    method data: string = Js.to_string (get _innerSelf "data");
-  };
+module RTCErrorEvent = {
+  type t;
+  external getMessage : t => string = "message" [@@bs.get];
 };
 
-let module RTCDataChannel = {
-  class t innerSelf => {
-    val _innerSelf = innerSelf;
-    method setOnError (cb: string => unit) =>
-      set _innerSelf "onerror" (Js.wrap_callback (fun e => cb (Js.string_of_error e)));
-    method setOnOpen (cb: unit => unit) =>
-      set _innerSelf "onopen" (Js.wrap_callback (fun () => cb ()));
-    method setOnClose (cb: unit => unit) =>
-      set _innerSelf "onclose" (Js.wrap_callback (fun () => cb ()));
-    method setOnMessage (cb: MessageEvent.t => unit) =>
-      set _innerSelf "onmessage" (Js.wrap_callback (fun e => cb ((new MessageEvent.t) e)));
-    method send s :unit => meth_call _innerSelf "send" [|inject (Js.string s)|];
-  };
-  type optionsT = {ordered: bool, maxRetransmitTime: float};
-  let createDataChannel connection channelName channelOptions => {
-    let options = new_obj (variable "Object");
-    set options "ordered" channelOptions.ordered;
-    set options "maxRetransmitTime" channelOptions.maxRetransmitTime;
-    let channel =
-      meth_call
-        connection#raw "createDataChannel" [|inject (Js.string channelName), inject options|];
-    (new t) channel
-  };
+module RTCMessageEvent = {
+  type t;
+  external getData : t => string = "data" [@@bs.get];
+  external getMessage : t => string = "message" [@@bs.get];
 };
 
-let module RTCSessionDescription = {
-  class t innerSelf => {
-    val _innerSelf: any = innerSelf;
-    method raw = _innerSelf;
-  };
+module RTCDataChannel = {
+  type t;
+  type optionsT;
+  external setOnError : t => (RTCErrorEvent.t => unit) => unit = "onerror" [@@bs.set];
+  external setOnOpen : t => (unit => unit) => unit = "onopen" [@@bs.set];
+  external setOnClose : t => (unit => unit) => unit = "onclose" [@@bs.set];
+  external setOnMessage : t => (RTCMessageEvent.t => unit) => unit = "onmessage" [@@bs.set];
+  external send : t => string => unit = "send" [@@bs.send];
+  external makeOptions : ordered::Js.boolean => maxRetransmitTime::float => optionsT =
+    "" [@@bs.obj];
+  let makeOptions ::ordered ::maxRetransmitTime =>
+    makeOptions ordered::(Js.Boolean.to_js_boolean ordered) ::maxRetransmitTime;
 };
 
-let module RTCPeerConnection = {
-  type offerT = {offerToReceiveAudio: float, offerToReceiveVideo: float};
-  class t = {
-    as self;
-    val _innerSelf: any = new_obj (variable "RTCPeerConnection") [||];
-    method raw = _innerSelf;
-    method setOnIceCandidate (cb: RTCPeerConnectionIceEvent.t => unit) =>
-      set
-        _innerSelf
-        "onicecandidate"
-        (Js.wrap_callback (fun e => cb ((new RTCPeerConnectionIceEvent.t) e)));
-    method setOnIceConnectionStateChange (cb: RTCIceConnectionStateChangeEvent.t => unit) =>
-      set
-        _innerSelf
-        "oniceconnectionstatechange"
-        (Js.wrap_callback (fun e => (new RTCIceConnectionStateChangeEvent.t) e));
-    method setOnDataChannel (cb: RTCDataChannel.t => unit) =>
-      set
-        _innerSelf
-        "ondatachannel"
-        (Js.wrap_callback (fun e => cb ((new RTCDataChannel.t) (get e "channel"))));
-    method addIceCandidate (iceCandidate: RTCIceCandidate.t) (cb: option string => unit) :unit => {
-      let promise = meth_call _innerSelf "addIceCandidate" [|inject iceCandidate#raw|];
-      meth_call
-        promise
-        "then"
-        [|
-          inject (Js.wrap_callback (fun () => cb None)),
-          inject (Js.wrap_callback (fun err => cb (Some (Js.string_of_error err))))
-        |]
-    };
-    method createDataChannel channelName channelOptions =>
-      RTCDataChannel.createDataChannel self channelName channelOptions;
-    method createOffer
-           offerOptions
-           (success: RTCSessionDescription.t => unit)
-           (failure: string => unit)
-           :unit => {
-      let options = obj [|
-        ("offerToReceiveAudio", inject offerOptions.offerToReceiveAudio),
-        ("offerToReceiveVideo", inject offerOptions.offerToReceiveVideo)
-      |];
-      let promise = meth_call _innerSelf "createOffer" [|inject options|];
-      meth_call
-        promise
-        "then"
-        [|
-          inject (Js.wrap_callback (fun e => success ((new RTCSessionDescription.t) e))),
-          inject (Js.wrap_callback (fun e => failure (Js.string_of_error e)))
-        |]
-    };
-    method createAnswer (success: RTCSessionDescription.t => unit) (failure: string => unit) :unit => {
-      let promise = meth_call _innerSelf "createAnswer" [||];
-      meth_call
-        promise
-        "then"
-        [|
-          inject (Js.wrap_callback (fun e => success ((new RTCSessionDescription.t) e))),
-          inject (Js.wrap_callback (fun err => failure (Js.string_of_error err)))
-        |]
-    };
-    method setLocalDescription (desc: RTCSessionDescription.t) (cb: option string => unit) :unit => {
-      let promise = meth_call _innerSelf "setLocalDescription" [|inject desc#raw|];
-      meth_call
-        promise
-        "then"
-        [|
-          inject (Js.wrap_callback (fun e => cb None)),
-          inject (Js.wrap_callback (fun e => cb (Some (Js.string_of_error e))))
-        |]
-    };
-    method setRemoteDescription (desc: RTCSessionDescription.t) (cb: option string => unit) :unit => {
-      let promise = meth_call _innerSelf "setRemoteDescription" [|inject desc#raw|];
-      meth_call
-        promise
-        "then"
-        [|
-          inject (Js.wrap_callback (fun e => cb None)),
-          inject (Js.wrap_callback (fun e => cb (Some (Js.string_of_error e))))
-        |]
-    };
-    method close () :unit => meth_call _innerSelf "close" [||];
-  };
+module RTCDataChannelEvent = {
+  type t;
+  external getChannel : t => RTCDataChannel.t = "channel" [@@bs.get];
+};
+
+module RTCOffer = {
+  type t;
+  type optionsT;
+  external makeOptions :
+    offerToReceiveAudio::Js.boolean => offerToReceiveVideo::Js.boolean => optionsT =
+    "" [@@bs.obj];
+  let makeOptions ::offerToReceiveAudio ::offerToReceiveVideo =>
+    makeOptions
+      offerToReceiveAudio::(Js.Boolean.to_js_boolean offerToReceiveAudio)
+      offerToReceiveVideo::(Js.Boolean.to_js_boolean offerToReceiveVideo);
+};
+
+module RTCSessionDescription = {
+  type t;
+};
+
+module RTCPeerConnection = {
+  type t;
+  external create : unit => t = "RTCPeerConnection" [@@bs.new];
+  external setOnIceCandidate : t => (RTCPeerConnectionIceEvent.t => unit) => unit =
+    "onicecandidate" [@@bs.set];
+  external setOnIceConnectionStateChange :
+    t => (RTCIceConnectionStateChangeEvent.t => unit) => unit =
+    "oniceconnectionstatechange" [@@bs.set];
+  external setOnDataChannel : t => (RTCDataChannelEvent.t => unit) => unit =
+    "ondatachannel" [@@bs.set];
+  external addIceCandidate : t => RTCIceCandidate.t => Js_promise.t unit /*string*/ =
+    "addIceCandidate" [@@bs.send];
+  external createDataChannel :
+    t => channelName::string => options::RTCDataChannel.optionsT => RTCDataChannel.t =
+    "createDataChannel" [@@bs.send];
+  external createOffer :
+    t => options::RTCOffer.optionsT => Js_promise.t RTCSessionDescription.t /*string*/ =
+    "createOffer" [@@bs.send];
+  external createDefaultOffer : t => Js_promise.t RTCOffer.t /*string*/ =
+    "createOffer" [@@bs.send];
+  external createAnswer : t => Js_promise.t RTCSessionDescription.t /*string*/ =
+    "createAnswer" [@@bs.send];
+  external setLocalDescription : t => RTCSessionDescription.t => Js_promise.t unit /*string*/ =
+    "setLocalDescription" [@@bs.send];
+  external setRemoteDescription : t => RTCSessionDescription.t => Js_promise.t unit /*string*/ =
+    "setRemoteDescription" [@@bs.send];
+  external close : t => unit = "close" [@@bs.send];
 };

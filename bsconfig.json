@@ -1,0 +1,8 @@
+{
+    "name" : "ReWebRTC",
+    "sources": [
+      { "dir": "src" },
+      { "dir": "example", "type": "dev" }
+    ],
+    "bs-dependencies" : ["reason-js", "ReSocketIO"]
+}
