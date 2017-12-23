@@ -20,5 +20,20 @@
     "reason-js": "https://github.com/BuckleTypes/reason-js#v0.3.0",
     "webpack": "^2.4.1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bsansouci/ReWebRTC.git"
+  },
+  "homepage": "https://github.com/bsansouci/ReWebRTC#readme",
+  "bugs": "https://github.com/bsansouci/ReWebRTC/issues",
+  "keywords": [
+    "reason",
+    "bucklescript",
+    "webrtc",
+    "real-time communication",
+    "peer-to-peer",
+    "streaming"
+  ],
+  "license": "MIT",
   "author": "Benjamin San Souci <benjamin.sansouci@gmail.com>"
 }
